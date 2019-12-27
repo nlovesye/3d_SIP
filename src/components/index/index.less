@@ -1,0 +1,114 @@
+@import '~@assets/styles/variables.less';
+.app_main{
+    height: 100%;
+
+    .main_header{
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.20);
+        display: flex;
+        align-items: center;
+        z-index: 1030; // modal弹窗1029
+
+        .header-logo{
+            width: 83px;
+            height: 31px;
+            font-size: 0;
+        }
+
+        .header-menu{
+            height: @headerHeight;
+            flex-grow: 1;
+            margin: 0 50px 0 120px;
+
+            .ivu-menu-item, .ivu-menu-submenu-title{
+                line-height: @headerHeight;
+            }
+        }
+    }
+
+    .main_content{
+        height: 100%;
+
+        .content_area_box{
+            height: 100%;
+
+            .content_sider{
+                position: relative;
+
+                .sider_con{
+                    position: absolute;
+                    height: 54px;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    border-top: 1px solid #575859;
+                    // background-color: #fff;
+                    line-height: 54px;
+                    text-align: center;
+                    cursor: pointer;
+                    color: #a1a1a2;
+                    &:hover{
+                        color: #fff;
+                    }
+                }
+
+                .ivu-menu{
+                    i{
+                        width: 0;
+                        font-size: 0;
+                        transition: width 0.2s ease;
+                    }
+                }
+
+                &.ivu-layout-sider-collapsed{
+                    .ivu-menu{
+                        i{
+                            transform: translate(5px);
+                            transition: font-size .2s ease .2s, transform .2s ease .2s;
+                            vertical-align: middle;
+                            font-size: 22px;
+                        }
+                        span{
+                            display: none;
+                        }
+                    }
+                }
+            }
+    
+            .content_content{
+                height: 100%;
+            
+                // 表格样式设置-----------------------------start----------------
+                .table_header_top{
+                    padding: 10px 0;
+                }
+
+                .table_header_title{
+                    padding: 0 10px;
+                    height: 48px;
+                    line-height: 48px;
+                    border: 1px solid #dcdee2;
+                    border-bottom: none;
+                }
+
+                th .ivu-table-cell{
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    width: 100%;
+                }
+
+                .ivu-table-footer{
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    box-shadow: 0px 1px 1px 0px #e8eaec inset;
+                    
+                    .ivu-page{
+                        padding: 2px 10px;
+                    }
+                }
+                // 表格样式设置-----------------------------end----------------
+            }
+        }
+    }
+}

@@ -1,0 +1,442 @@
+.project_setting, .new_project, .history{
+    @headerHeight: 30px;
+    @footerHeight: 40px;
+    // position: absolute;
+    z-index: 1000;
+    
+    .textStyle{
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+    }
+    .hfbar{
+        background-image: linear-gradient(180deg, #4A4848 0%, #3F3E3E 100%);
+        padding: 0 10px;
+    }
+    .defbtn{
+        background-color: #737271;
+        border-radius: 2px;
+        font-size: 12px;
+        color: #fff;
+        border: none;
+
+        &:hover{
+            background: #626160;
+        }
+    }
+    h4, h5{
+        font-weight: normal;
+    }
+
+    .tb{
+        border-color: #3F3F3F;
+        margin-top: 10px;
+        .ivu-table, .ivu-table th, .ivu-table td{
+            background: none;
+        }
+        .ivu-table:before, .ivu-table-border:after{
+            background-color: #3F3F3F;
+        }
+        .ivu-table th, .ivu-table td, .ivu-table-border th, .ivu-table-border td{
+            border-color: #3F3F3F;
+        }
+        .ivu-table-cell{
+            .textStyle;
+        }
+        .ivu-table-header thead tr th{
+            padding: 2px 0;
+        }
+        .ivu-table-small td{
+            height: 24px;
+        }
+        // 表格操作列icon
+        .tb_refresh, .tb_trash{
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 14px;
+        }
+        .ivu-table-row.ivu-table-row-highlight{
+            background-color: #3A3A3A;
+        }
+        .ivu-table-header .ivu-table-cell {
+            padding: 0 10px;
+        }
+        .ivu-table-tbody .ivu-table-cell{
+            padding: 0 6px;
+        }
+
+        &.history_table{
+            margin-top: 10px;
+    
+            .tb_play{
+                cursor: pointer;
+    
+                :hover{
+                    color: #fff;
+                }
+            }
+        }
+    }
+
+    .ivu-modal{
+
+        .ivu-modal-content{
+            border-radius: 0;
+            background-color: #2C2B29;
+            border: 1px solid #575657;
+
+            .ivu-modal-header{
+                height: @headerHeight;
+                border-bottom: none;
+                box-shadow: 0 1px 0 0 #1F1F1F;
+                .hfbar;
+            }
+            .ivu-modal-header-inner{
+                height: 100%;
+                line-height: @headerHeight;
+                font-size: 12px;
+                color: rgba(255,255,255,0.6);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .close{
+                    cursor: pointer;
+                    &:hover{
+                        color: #fff;
+                    }
+                }
+            }
+
+            .ivu-modal-body{
+                padding: 8px 10px;
+                // color: #fff;
+                font-size: 12px;
+                // height: 285px;
+            }
+
+            .ivu-modal-footer{
+                height: @footerHeight;
+                border-top: none;
+                .hfbar;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                .save{
+                    border-radius: 4px;
+                    font-size: 12px;
+                    width: 120px;
+                    height: 26px;
+                }
+            }
+
+            .tabs{
+                display: flex;
+                width: 100%;
+
+                .fade-enter-active, .fade-leave-active {
+                    transition: opacity 0.4s;
+                }
+                .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+                    opacity: 0;
+                }
+
+                .tabs_nav{
+                    width: 80px;
+                    border: 1px solid #3F3F3F;
+                    padding: 7px 0;
+                    flex-shrink: 0;
+                    height: 238px;
+
+                    li{
+                        height: 26px;
+                        line-height: 26px;
+                        cursor: pointer;
+                        padding: 0 5px;
+                        margin: 1px 0;
+                        color: rgba(255,255,255,0.8);
+                    }
+                    li.active, li:hover{
+                        background-image: linear-gradient(180deg, #4A4848 0%, #3F3E3E 100%);
+                    }
+                    // li:hover{
+
+                    // }
+                }
+
+                .tabs_content{
+                    margin-left: 10px;
+                    width: 100%;
+                    max-width: 363px;
+                    position: relative;
+                    min-height: 480px;
+
+                    &>li{
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        
+                        // 重置ivu样式
+                        .ivu-select-selected-value{
+                            color: rgba(255, 255, 255, 0.6);
+                        }
+                        .ivu-select-selection{
+                            background-color: transparent;
+                            border-color: #575657;
+                        }
+                        .ivu-input-number, .ivu-input{
+                            border: 1px solid #575657;
+                            background-color: transparent;
+                        }
+                        .ivu-input-number-input-wrap input, .ivu-input-wrapper input{
+                            background-color: #2C2B29;
+                            color: rgba(255, 255, 255, 0.6);
+                        }
+                        .ivu-btn.ivu-btn-default {
+                            // opacity: 0.9;
+                            background: #262523;
+                            border: 1px solid #575657;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            color: #fff;
+                            padding: 0px 20px;
+
+                            &:hover{
+                                color: #FFBA30;
+                                background-color: #2C2B29;
+                            }
+                        }
+                        .ivu-btn.ivu-btn-default[disabled]{
+                            color: #c5c8ce;
+                            border: 1px solid #575657;
+                            &:hover{
+                                color: #c5c8ce;
+                                background-color: #262523;
+                            }
+                        }
+                        .ivu-radio-group-button .ivu-radio-wrapper{
+                            background: none;
+                            color: rgba(255, 255, 255, 0.6);
+                            &:hover{
+                                color: #FFBA30;
+                                border-color: #FFBA30;;
+                            }
+                        }
+                        .ivu-radio-group-button .ivu-radio-wrapper-checked{
+                            color: #FFBA30;
+                        }
+                    }
+                }
+
+                // 传感器
+                .sensor{
+                    .headbar{
+                        .textStyle;
+                        height: 24px;
+                        line-height: 24px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    }
+                    // 位置信息
+                    .location{
+                        margin-top: 10px;
+                        h4{
+                            .textStyle;
+                            height: 20px;
+                            line-height: 20px;
+                        }
+                        ul{
+                            margin-top: 2px;
+                            border: 1px solid #3F3F3F;
+                            width: 100%;
+                            overflow: hidden;
+                            padding: 10px 0;
+                            li{
+                                width: 120px;
+                                float: left;
+                                height: 42px;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                padding: 0 8px;
+                                h5{
+                                    .textStyle;
+                                }
+                            }
+                        }
+                    }
+                    // 点云设置
+                    .point{
+                        margin-top: 10px;
+                        h4{
+                            .textStyle;
+                            height: 20px;
+                            line-height: 20px;
+                        }
+                        
+                        .size, .density {
+                            margin-top: 10px;
+                        }
+                    }
+
+                    .btn_bar{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 30px;
+                        margin-top: 10px;
+
+                        .ivu-btn{
+                            margin: 0 5px;
+                        }
+                    }
+                }
+
+                // 范围标定; 建模; 地面设定; 基准面设定
+                .boundary, .modeling, .ground, .datum{
+                    h4{
+                        .textStyle;
+                        height: 20px;
+                        line-height: 20px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 6px;
+                    }
+                    .check, .refresh{
+                        cursor: pointer;
+                        margin-left: 10px;
+                        font-size: 14px;
+                    }
+                    .positions{
+                        border-bottom: 1px solid #3F3F3F;
+                        padding-bottom: 8px;
+                        
+                        .top_bar{
+                            .textStyle;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            flex-grow: 1;
+                            height: 30px;
+                        }
+                    }
+                    .area, .count{
+                        margin-top: 10px;
+                        border-bottom: 1px solid #3F3F3F;
+                        padding-bottom: 8px;
+                        .ivu-radio-group-button.ivu-radio-group-small .ivu-radio-wrapper{
+                            font-size: 12px;
+                        }
+                    }
+                    .btn_bar{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        margin-top: 10px;
+                        
+                        .ivu-btn{
+                            margin: 0 10px;
+                        }
+                    }
+                    .type{
+                        .positions;
+                        .ivu-radio-group-button.ivu-radio-group-small .ivu-radio-wrapper{
+                            font-size: 12px;
+                        }
+                    }
+                }
+
+                // 去噪
+                .denoising{
+                    .count{
+                        line-height: 24px;
+                        color: rgba(255,255,255,0.6);
+                    }
+                    .btn_bar{
+                        display: flex;
+                        margin-top: 10px;
+                        justify-content: center;
+                    }
+                }
+
+                // 工程计算
+                .calculate{
+                    .density{
+                        color: rgba(255, 255, 255, 0.6);
+                        display: flex;
+                    }
+                    .btn_bar{
+                        display: flex;
+                        margin-top: 10px;
+                        justify-content: center;
+                    }
+                }
+
+                // 上传周期
+                .cycle{
+                    .starttime, .period{
+                        color: rgba(255, 255, 255, 0.6);
+                        display: flex;
+                        .ivu-date-picker {
+                            color: #515a6e;
+                        }
+                    }
+                    .period{
+                        margin-top: 10px;
+                    }
+                    .btn_bar{
+                        display: flex;
+                        margin-top: 50px;
+                        justify-content: center;
+                    }
+                }
+            }
+        }
+    }
+}
+.project_setting .ivu-modal{
+    position: absolute;
+    top: 110px;
+    right: 20px;
+}
+
+.new_project{
+    .ivu-modal{
+        .ivu-btn-text{
+            background: #737271;
+            border: 1px solid #575657;
+            color: #fff;
+            &:hover{
+                background: #626160;
+                color: #ffc859;
+            }
+        }
+        .ivu-modal-content .ivu-modal-footer{
+            justify-content: flex-end;
+        }
+        .ivu-modal-content .ivu-modal-body{
+            padding: 8px 10px 0;
+            font-size: 12px;
+        }
+        .ivu-form .ivu-form-item-label{
+            color: rgba(255,255,255,0.9);
+            font-size: 12px;
+        }
+    }
+}
+
+.history .ivu-modal{
+    position: absolute;
+    top: 110px;
+    right: 20px;
+
+    .ivu-input{
+        background-color: #2C2B29;
+        color: rgba(255, 255, 255, 0.6);
+        border: 1px solid #575657;
+    }
+}

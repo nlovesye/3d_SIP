@@ -1,0 +1,375 @@
+.project{
+    height: 100%;
+
+    .text_click{
+        cursor: pointer;
+        margin: 0 4px;
+
+        &:hover{
+            color: #fff;
+        }
+    }
+
+    .project_sider{
+        padding-top: 35px;
+        position: relative;
+        background: #2C2B29;
+
+        .ivu-layout-sider-zero-width-trigger{
+            display: block !important;
+            top: 50%;
+            height: 80px;
+            line-height: 80px;
+            width: 20px;
+            right: -20px;
+            background: #2C2B29;
+            margin-top: -40px;
+            font-size: 0;
+            z-index: 999;
+
+            i{
+                display: none;
+            }
+
+            &:hover{
+                &:before, &:after{
+                    border-color: rgba(255,186,48,0.9);
+                    // border-color: #fff;
+                }
+                // background: rgba(255,186,48,0.9);
+            }
+
+            &:before{
+                content: '';
+                display: inline-block;
+                width: 6px;
+                height: 6px;
+                border-left: 1px solid #fff;
+                border-bottom: 1px solid #fff;
+                transform: rotate(45deg);
+                transition: all 400ms;
+            }
+            &:after{
+                content: '';
+                display: inline-block;
+                width: 6px;
+                height: 6px;
+                border-left: 1px solid #fff;
+                border-bottom: 1px solid #fff;
+                transform: rotate(45deg);
+                transition: all 400ms;
+            }
+        }
+
+        &.ivu-layout-sider-collapsed .ivu-layout-sider-zero-width-trigger {
+            &:before, &:after{
+                transform: rotate(225deg);
+                margin-left: -2px;
+            }
+        }
+
+        .sider_topcon{
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 35px;
+            border: 1px solid #575859;
+            padding: 0 5px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            color: #a1a1a2;
+
+            .sider_trigger{
+                transition: all 0.2s ease;
+                padding: 5px;
+                cursor: pointer;
+
+                &:hover{
+                    color: #fff;
+                }
+            }
+
+            .opt{
+                overflow: hidden;
+                transition: width 0.2s ease;
+                white-space: nowrap;
+            }
+
+            &.collapsed{
+                .sider_trigger{
+                    margin-left: 16px;
+                }
+                .opt{
+                    width: 0;
+                }
+            }
+        }
+
+        // 分组树
+        .group_tree{
+            li {
+                position: relative;
+            }
+            li ul {
+                padding-left: 0;
+            }
+            .ivu-tree-empty{
+                color: rgba(255,255,255,0.7);
+                text-align: center;
+                margin: 10px auto;
+            }
+            .ivu-tree-arrow{
+                position: absolute;
+                width: 28px;
+                // display: none;
+                color: rgba(255,255,255,0.7);
+
+                i {
+                    font-size: 22px;
+                }
+            }
+            .group_item{
+                // display: inline-block;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding-left: 28px;
+                padding-right: 6px;
+                width: 100%;
+                color: rgba(255,255,255,0.7);
+                cursor: pointer;
+                flex-grow: 1;
+                border-radius: 4px;
+
+                &.active, &.peoject_on{
+                    background: rgba(255,186,48,0.9);
+                    color: #fff;
+                }
+                &:hover{
+                    color: #fff;
+                }
+
+                .content {
+                    flex-grow: 1;
+                }
+                .content.project{
+                    padding-left: 6px;
+                }
+
+                .more{
+                    &:hover{
+                        color: #fff;
+                    }
+                }
+            }
+        }
+    }
+    .project_rightcon{
+        height: 100%;
+        position: relative;
+        background-color: #D6D6D6;
+
+        .spin-icon-load{
+            animation: ani-demo-spin 1s linear infinite;
+        }
+        .spin-icon-load-text{
+            font-size: 14px;
+        }
+                    
+        .ivu-spin-fix{
+            background-color: rgba(100, 100, 100, 0.5);
+        }
+        .ivu-table-wrapper > .ivu-spin-fix{
+            border: none;
+        }
+
+        .con_header{
+            height: 35px;
+            background-image: linear-gradient(180deg, #4A4848 0%, #3F3E3E 100%);
+            box-shadow: 0 1px 0 0 #1F1F1F;
+            position: relative;
+
+            &.collapsed{
+                // padding-left: 54px;
+            }
+
+            .sider_trigger_hide{
+                position: absolute;
+                left: 10px;
+                top: 0;
+                transition: all 0.2s ease;
+                padding: 5px;
+                cursor: pointer;
+                color: #a1a1a1;
+
+                &:hover{
+                    color: #fff;
+                }
+            }
+
+            .toolbar{
+                height: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .tools{
+                    color: #a1a1a1;
+                    height: 100%;
+                    // font-size: 0;
+                    display: flex;
+                    align-items: center;
+    
+                    .divided{
+                        width: 1px;
+                        height: 20px;
+                        background-color: #767779;
+                        display: inline-block;
+                        margin: 0 5px;
+                    }
+    
+                    i.ivu-icon{
+                        cursor: pointer;
+                        margin: 0 5px;
+    
+                        &:hover{
+                            color: #fff;
+                        }
+                    }
+                }
+            }
+
+            .ivu-btn.ivu-btn-default {
+                // opacity: 0.9;
+                background: #262523;
+                border: 1px solid #575657;
+                border-radius: 4px;
+                font-size: 12px;
+                color: #fff;
+                padding: 0px 20px;
+
+                &:hover{
+                    color: #FFBA30;
+                    background-color: #2C2B29;
+                }
+            }
+            .ivu-btn.ivu-btn-default[disabled]{
+                color: #c5c8ce;
+                border: 1px solid #575657;
+                &:hover{
+                    color: #c5c8ce;
+                    background-color: #262523;
+                }
+            }
+        }
+
+        .con_content{
+            position: absolute;
+            top: 35px;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            font-size: 0;
+
+            .canvas_3d{
+                // position: relative;
+                // z-index: 999;
+            }
+            #potree_render_area{
+                display: none !important;
+            }
+
+            // 描述信息
+            .desc_info{
+                position: absolute;
+                z-index: 99;
+                top: 22px;
+                left: 24px;
+                padding: 10px 20px 8px 12px;
+                background-color: rgba(0,0,0,0.5);
+
+                canvas{
+                    display: none;
+                }
+
+                p{
+                    color: #fff;
+                    font-size: 14px;
+                    margin-bottom: 2px;
+
+                    span.color{
+                        color: #FFBA30;
+                    }
+                }
+            }
+
+            // 历史数据步骤条
+            .history_stepsbar{
+                position: absolute;
+                left: 50%;
+                bottom: 25px;
+                z-index: 99;
+                margin-left: -293px;
+
+                .ivu-radio-wrapper{
+                    background-image: linear-gradient(180deg, #4A4848 0%, #3F3E3E 100%);
+                    color: rgba(255,255,255,0.7);
+                    &:hover{
+                        background-image: linear-gradient(180deg, #4A4848 0%, #2C2B29 100%);
+                        color: #fff;
+                    }
+                }
+                .ivu-radio-wrapper-checked{
+                    background-image: linear-gradient(180deg, #4A4848 0%, #2C2B29 100%);
+                    color: #fff;
+                }
+            }
+
+            // 计算信息
+            .calculate_info{
+                position: absolute;
+                width: 700px;
+                height: 35px;
+                background-color: rgba(0,0,0,0.8);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                bottom: 25px;
+                left: 50%;
+                margin-left: -345px;
+                z-index: 99;
+                padding: 20px;
+                color: #fff;
+                border-radius: 2px;
+
+                .area, .volume, .weight{
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    width: 220px;
+                    font-size: 12px;
+
+                    span{
+                        color: #FFBA30;
+                    }
+                }
+            }
+            .calculate_info.history{
+                bottom: 95px;
+            }
+        }
+    }
+}
+.project_history_dropdown{
+    background: #2C2B29;
+    ul li{
+        color: rgba(255,255,255,0.6);
+
+        &:hover{
+            background: #2C2B29;
+            color: #fff;
+        }
+    }
+}
