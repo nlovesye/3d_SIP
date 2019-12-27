@@ -31,7 +31,7 @@ import {
     RESET_DATA
 } from '@api/project'
 import * as THREE from '@/libs/threejs/three.module.js'
-import { sleep, getMousePointCloudIntersection, deepCopy, getMouseModeIntersection } from '@libs/tools'
+import { sleep, deepCopy, getMouseModeIntersection } from '@libs/tools'
 import { PLYLoader } from '@/libs/threejs/loaders/PLYLoader'
 import moment from 'moment'
 import { OrbitControls } from '@/libs/threejs/controls/OrbitControls.js'
@@ -93,7 +93,7 @@ export default {
     },
 
     computed: {
-        ...mapState(['contentWidth', 'contentHeight']),
+        ...mapState(['contentWidth', 'contentHeight', 'apiTasks']),
         // 上传周期text
         periodText () {
             if ('period' in this.projectInfo && 'periodType' in this.projectInfo) {
@@ -274,7 +274,8 @@ export default {
             ctrls: null, // 控制器
             aniFrame: 0, // requestAnimationFrame
             mode: null, // 当前显示模型
-            points: [] // 点集
+            points: [], // 标定点集
+            rangeMesh: null // 范围标定mesh
         }
     },
 
@@ -1028,124 +1029,7 @@ export default {
             // console.log('r', currentRow, oldRow)
             this.currentDevice = { ...currentRow }
         },
-        // 复位
-        async sensorReset () {
-            this.$Modal.confirm({
-                title: '是否确定复位操作？',
-                onOk: async () => {
-                    try {
-                        this.resetLoad = true
-                        await RESET_DATA(this.projectInfo.id)
-                        const ret = await GET_PROJECT(this.projectInfo.id)
-                        this.projectInfo = ret || {}
-                    } catch (error) {
-                        console.log(error)
-                    } finally {
-                        this.resetLoad = false
-                    }
-                }
-            })
-        },
 
-        // 获取标定数据
-        async getCalibrations ({ type }) {
-            try {
-                this.calibrationsLoad = true
-                const key = type === 1 ? 'calibrations' : 'calibrations' + type
-                this[key] = await GET_CALIBRATION({
-                    projectId: this.projectInfo.id,
-                    type: type
-                })
-            } catch (error) {
-                console.log(error)
-            } finally {
-                this.calibrationsLoad = false
-            }
-        },
-        // 标定
-        onCalibration2 (type) {
-            if (this.inClipping || this.inDatum) return
-            const key = type === 1 ? 'calibrations' : `calibrations${type}`
-            this.backupCalibrations = deepCopy(this[key])
-            // console.log('bbb', this[key], this.backupCalibrations)
-            this[key] = []
-            if (type === 1) {
-                this.pViewer.scene.removeAllClipVolumes()
-                this.clippingItem = null
-                this.inClipping = true
-                this.clippingItem = this.pViewer.clippingTool.startInsertion({
-                    type: 'polygon',
-                    leftClickFn: (markers, p) => {
-                        // console.log('click', markers, p)
-                        const mp = markers[markers.length - 2].position
-                        if (p) {
-                            this[key].push({
-                                projectId: this.projectInfo.id,
-                                ...p,
-                                mx: mp.x,
-                                my: mp.y,
-                                mz: mp.z
-                            })
-                        } else {
-                            this[key].push({
-                                projectId: this.projectInfo.id,
-                                ...mp,
-                                mx: mp.x,
-                                my: mp.y,
-                                mz: mp.z
-                            })
-                        }
-                    }
-                })
-            } else if (type === 3) { // 基准面标定
-                this.inDatum = true
-                this.clearDatumView()
-            }
-        },
-        // 完成标定
-        onCalibrationConfirm2 (type) {
-            if (type === 1) {
-                if (this.clippingItem && this.clippingItem.on) {
-                    this.clippingItem.viewer.dispatchEvent({
-                        type: 'cancel_insertions'
-                    })
-                    this.clippingItem = null
-                }
-                this.inClipping = false
-            } else if (type === 3) {
-                this.inDatum = false
-            }
-            // console.log('完成标定', this.calibrations3, this[key])
-        },
-        // 取消标定
-        onCalibrationCancel2 (type) {
-            const key = type === 1 ? 'calibrations' : `calibrations${type}`
-            this.clearClipVolumes()
-            this[key] = deepCopy(this.backupCalibrations)
-            // console.log('取消标定', key, this[key], deepCopy(this.backupCalibrations))
-            if (type === 1) {
-                if (this[key].length > 0) {
-                    let polyClipVol = new Potree.PolygonClipVolume(this.pViewer.scene.getActiveCamera().clone())
-                    this.pViewer.scene.addPolygonClipVolume(polyClipVol)
-                    // polyClipVol.addMarker()
-                    this[key].forEach(p => {
-                        let projectedPos = new THREE.Vector3(p.mx, p.my, p.mz)
-                        let marker = new THREE.Mesh()
-                        marker.position.copy(projectedPos)
-                        polyClipVol.markers.push(marker)
-                    })
-                    polyClipVol.initialized = true
-                    // console.log('polyClipVol', polyClipVol, polyClipVol.markers)
-                }
-                this.backupCalibrations = []
-                this.inClipping = false
-            } else if (type === 3) {
-                this.backupCalibrations = []
-                this.inDatum = false
-                this.clearDatumView()
-                this.showDatumView()
-            }
-        },
         // 清除范围标定类型和显示
         clearClipVolumes () {
             if (this.clippingItem && this.clippingItem.on) {
@@ -1168,30 +1052,6 @@ export default {
             this.datumCones && this.datumCones.forEach(cone => this.pViewer.scene.scene.remove(cone))
             this.datumCones = []
         },
-        // 范围标定保存
-        async calibrationsSave (type) {
-            const key = type === 1 ? 'calibrations' : `calibrations${type}`
-            try {
-                this.loadText = '范围标定中'
-                this.projectLoad = true
-                await this.deleteCalibrations(type)
-                this[key] = this[key].map((item, sort) => ({ ...item, type, sort }))
-                // console.log('d', this[key].filter(item => !item.id))
-                if (!this[key] || this[key].length < 1) return
-                const ret = await ADD_CALIBRATION(this[key])
-                this[key] = [...ret]
-                if (type === 1) {
-                    const newProjectInfo = await this.pollingProjectInfo(this.projectInfo, 'multipleMergeFilePath')
-                    this.clearClipVolumes()
-                    this.projectInfo = { ...newProjectInfo }
-                    await this.showPointsMode(this.projectInfo.multipleMergeFilePath)
-                }
-            } catch (error) {
-                console.log(error)
-            } finally {
-                this.projectLoad = false
-            }
-        },
         // 删除标定数据
         async deleteCalibrations (type) {
             try {
@@ -1210,7 +1070,7 @@ export default {
             let mouse = new THREE.Vector2()
             mouse.x = event.clientX - (this.isCollapsed ? 0 : 200)
             mouse.y = event.clientY - 83
-            let r = getMouseModeIntersection(mouse, this.pViewer.renderer, this.pViewer.scene.getActiveCamera(), this.meshMode)
+            let r = getMouseModeIntersection(mouse, this.renderer, this.camera, this.mode)
             // console.log('r', r)
             if (r) {
                 this.drawDatumCone(r.point, true)
@@ -1609,7 +1469,6 @@ export default {
             this.setCtrls(this.camera, this.renderer)
             this.setLight()
             this.animate()
-            this.renderer.domElement.addEventListener('click', this.onCalibrationMouseClick)
         },
         setRenerer () {
             this.renderer = new THREE.WebGLRenderer({
@@ -1623,6 +1482,7 @@ export default {
             // console.log('setRenerer', width, height)
             this.renderer.setSize(width, height)
             this.renderer.setClearColor(0xffffff)
+            this.renderer.domElement.addEventListener('click', this.onCalibrationMouseClick)
         },
         setCamera () {
             const { width, height } = this.renderer.domElement
@@ -1726,8 +1586,8 @@ export default {
             } = this.projectInfo
             const showFileUri = meshFileName || denoiseFileName || multipleMergeFileName || originalFileName
             if (showFileUri) {
-                console.log('showFileUri', showFileUri)
-                await this.showPlyMode(showFileUri, 1, (meshFileName || denoiseFileName || multipleMergeFileName))
+                // console.log('showFileUri', showFileUri)
+                await this.showPlyMode(showFileUri, 1, (meshFileName || denoiseFileName))
             } else {
                 console.log('当前工程无采集数据！')
             }
@@ -1803,132 +1663,6 @@ export default {
             geo.setAttribute('color', new THREE.BufferAttribute(fr, 3))
         },
 
-        // 标定
-        onCalibration (type) {
-            if (this.inClipping || this.inDatum) return
-            const key = type === 1 ? 'calibrations' : `calibrations${type}`
-            this.backupCalibrations = deepCopy(this[key])
-            // console.log('bbb', this[key], this.backupCalibrations)
-            this[key] = []
-            if (type === 1) {
-                this.inClipping = true
-            } else if (type === 3) { // 基准面标定
-                this.inDatum = true
-                this.clearDatumView()
-            }
-        },
-        // 完成标定
-        onCalibrationConfirm (type) {
-            if (type === 1) {
-                if (this.clippingItem && this.clippingItem.on) {
-                    this.clippingItem.viewer.dispatchEvent({
-                        type: 'cancel_insertions'
-                    })
-                    this.clippingItem = null
-                }
-                this.inClipping = false
-            } else if (type === 3) {
-                this.inDatum = false
-            }
-            // console.log('完成标定', this.calibrations3, this[key])
-        },
-        // 取消标定
-        onCalibrationCancel (type) {
-            const key = type === 1 ? 'calibrations' : `calibrations${type}`
-            this.clearClipVolumes()
-            this[key] = deepCopy(this.backupCalibrations)
-            // console.log('取消标定', key, this[key], deepCopy(this.backupCalibrations))
-            if (type === 1) {
-                if (this[key].length > 0) {
-                    let polyClipVol = new Potree.PolygonClipVolume(this.pViewer.scene.getActiveCamera().clone())
-                    this.pViewer.scene.addPolygonClipVolume(polyClipVol)
-                    // polyClipVol.addMarker()
-                    this[key].forEach(p => {
-                        let projectedPos = new THREE.Vector3(p.mx, p.my, p.mz)
-                        let marker = new THREE.Mesh()
-                        marker.position.copy(projectedPos)
-                        polyClipVol.markers.push(marker)
-                    })
-                    polyClipVol.initialized = true
-                    // console.log('polyClipVol', polyClipVol, polyClipVol.markers)
-                }
-                this.backupCalibrations = []
-                this.inClipping = false
-            } else if (type === 3) {
-                this.backupCalibrations = []
-                this.inDatum = false
-                this.clearDatumView()
-                this.showDatumView()
-            }
-        },
-
-        // 标定点击事件
-        onCalibrationMouseClick (event) {
-            if (!this.inClipping) return
-            let mouse = new THREE.Vector2()
-            mouse.x = event.clientX - (this.isCollapsed ? 0 : 200)
-            mouse.y = event.clientY - 83
-            let r = getMouseModeIntersection(mouse, this.renderer, this.camera, this.mode)
-            // console.log('r', r)
-            if (r) {
-                this.drawPoint(r.point, true)
-                this.drawMesh()
-            }
-            // let I = getMousePointCloudIntersection(
-            //     mouse,
-            //     this.pViewer.scene.getActiveCamera(),
-            //     this.pViewer,
-            //     // this.pViewer.scene.pointclouds,
-            //     this.pointcloud,
-            //     { pickClipped: true }
-            // )
-            // if (I) {
-            //     this.drawDatumCone(I.location, true)
-            //     this.drawDatumMesh()
-            // }
-        },
-
-        // 画点
-        drawPoint (point, isNewPoint = false) {
-            let pGeo = new THREE.SphereGeometry(0.2, 10, 10)
-            let p = new THREE.Mesh(pGeo, new THREE.MeshNormalMaterial({
-                color: 0x00ffff,
-                depthTest: false,
-                depthWrite: false
-            }))
-            // p.material.depthTest = false
-            p.renderOrder = 99
-            p.position.x = point.x
-            p.position.y = point.y
-            p.position.z = point.z
-            isNewPoint && this.calibrations.push({
-                ...point,
-                projectId: this.projectInfo.id,
-                type: 1,
-                mx: point.x,
-                my: point.y,
-                mz: point.z
-            })
-            this.points.push(p)
-            // console.log('I', point)
-            this.scene.add(p)
-        },
-        // 画面
-        drawMesh () {
-            if (this.calibrations.length > 3) {
-                // console.log('draw', this.calibrations3)
-                this.datumMesh && this.scene.remove(this.datumMesh)
-                const convexGeo = new ConvexGeometry(this.calibrations.map(p => new THREE.Vector3(p.x, p.y, p.z)))
-                this.datumMesh = new THREE.Mesh(convexGeo, new THREE.MeshBasicMaterial({
-                    color: 0xffff00, // 三角面颜色
-                    side: THREE.DoubleSide // 两面可见
-                    // opacity: 0.6,
-                    // transparent: true
-                }))
-                this.scene.add(this.datumMesh)
-            }
-        },
-
         // 轮询工程信息
         async pollProjectInfo (curProjectInfo, diffKey) {
             try {
@@ -1961,6 +1695,24 @@ export default {
             } finally {
                 this.devicesLoad = false
             }
+        },
+        // 复位
+        async sensorReset () {
+            this.$Modal.confirm({
+                title: '是否确定复位操作？',
+                onOk: async () => {
+                    try {
+                        this.resetLoad = true
+                        await RESET_DATA(this.projectInfo.id)
+                        const ret = await GET_PROJECT(this.projectInfo.id)
+                        this.projectInfo = ret || {}
+                    } catch (error) {
+                        console.log(error)
+                    } finally {
+                        this.resetLoad = false
+                    }
+                }
+            })
         },
         // 数据采集
         gatherData () {
@@ -2013,6 +1765,136 @@ export default {
                 console.log(error)
             } finally {
                 this.sensorSaveLoad = false
+            }
+        },
+
+        // 标定点击事件
+        onCalibrationMouseClick (event) {
+            if (!this.inClipping) return
+            let mouse = new THREE.Vector2()
+            mouse.x = event.clientX - (this.isCollapsed ? 0 : 200)
+            mouse.y = event.clientY - 83
+            let r = getMouseModeIntersection(mouse, this.renderer, this.camera, this.mode)
+            // console.log('r', r)
+            if (r) {
+                this.drawPoint(r.point, true)
+                this.drawMesh()
+            }
+        },
+        // 画点
+        drawPoint (point, isNewPoint = false) {
+            let pGeo = new THREE.SphereGeometry(0.1, 10, 10)
+            let p = new THREE.Mesh(pGeo, new THREE.MeshNormalMaterial({
+                depthTest: false,
+                depthWrite: false
+            }))
+            // p.material.depthTest = false
+            p.renderOrder = 99
+            p.position.x = point.x
+            p.position.y = point.y
+            p.position.z = point.z
+            isNewPoint && this.calibrations.push({
+                ...point,
+                projectId: this.projectInfo.id,
+                type: 1,
+                mx: point.x,
+                my: point.y,
+                mz: point.z
+            })
+            this.points.push(p)
+            this.scene.add(p)
+        },
+        // 画面
+        drawMesh () {
+            if (this.calibrations.length > 3) {
+                // console.log('draw', this.calibrations3)
+                this.rangeMesh && this.scene.remove(this.rangeMesh)
+                const convexGeo = new ConvexGeometry(this.calibrations.map(p => new THREE.Vector3(p.x, p.y, p.z)))
+                this.rangeMesh = new THREE.Mesh(convexGeo, new THREE.MeshBasicMaterial({
+                    color: 0xffff00, // 三角面颜色
+                    side: THREE.DoubleSide // 两面可见
+                    // opacity: 0.6,
+                    // transparent: true
+                }))
+                this.scene.add(this.rangeMesh)
+            }
+        },
+
+        // 获取标定数据
+        async getCalibrations ({ type }) {
+            try {
+                this.calibrationsLoad = true
+                const key = type === 1 ? 'calibrations' : 'calibrations' + type
+                this[key] = await GET_CALIBRATION({
+                    projectId: this.projectInfo.id,
+                    type: type
+                })
+            } catch (error) {
+                console.log(error)
+            } finally {
+                this.calibrationsLoad = false
+            }
+        },
+        // 标定
+        onCalibration (type) {
+            if (this.inClipping || this.inDatum) return
+            const key = type === 1 ? 'calibrations' : `calibrations${type}`
+            this.backupCalibrations = deepCopy(this[key])
+            // console.log('bbb', this[key], this.backupCalibrations)
+            this[key] = []
+            if (type === 1) {
+                this.inClipping = true
+            } else if (type === 3) { // 基准面标定
+                this.inDatum = true
+                this.clearDatumView()
+            }
+        },
+        // 完成标定
+        onCalibrationConfirm (type) {
+            if (type === 1) {
+                this.inClipping = false
+            } else if (type === 3) {
+                this.inDatum = false
+            }
+            // console.log('完成标定', this.calibrations3, this[key])
+        },
+        // 取消标定
+        onCalibrationCancel (type) {
+            const key = type === 1 ? 'calibrations' : `calibrations${type}`
+            this.clearClipVolumes()
+            this[key] = deepCopy(this.backupCalibrations)
+            this.backupCalibrations = []
+            // console.log('取消标定', key, this[key], deepCopy(this.backupCalibrations))
+            if (type === 1) {
+                this.inClipping = false
+            } else if (type === 3) {
+                this.inDatum = false
+                this.clearDatumView()
+                this.showDatumView()
+            }
+        },
+        // 范围标定保存
+        async calibrationsSave (type) {
+            const key = type === 1 ? 'calibrations' : `calibrations${type}`
+            try {
+                this.loadText = '范围标定中'
+                this.projectLoad = true
+                await this.deleteCalibrations(type)
+                this[key] = this[key].map((item, sort) => ({ ...item, type, sort }))
+                // console.log('d', this[key].filter(item => !item.id))
+                if (!this[key] || this[key].length < 1) return
+                const ret = await ADD_CALIBRATION(this[key])
+                this[key] = [...ret]
+                if (type === 1) {
+                    const newProjectInfo = await this.pollProjectInfo(this.projectInfo, 'multipleMergeFileName')
+                    if (!newProjectInfo) throw Error
+                    this.projectInfo = { ...newProjectInfo }
+                    await this.showPlyMode(this.projectInfo.multipleMergeFileName)
+                }
+            } catch (error) {
+                console.log(error)
+            } finally {
+                this.projectLoad = false
             }
         }
     }

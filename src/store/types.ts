@@ -12,4 +12,5 @@ export interface RootStateTypes {
     refresh_token: string;
     userId: string | number;
     user_powers: any[];
+    apiTasks: any;
 }

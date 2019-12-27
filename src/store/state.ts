@@ -11,5 +11,6 @@ export default {
   access_token: localRead('access_token'),
   refresh_token: localRead('refresh_token'),
   user_powers: localReadArry('user_powers'),
-  userId: localRead('userId') ? parseInt(localRead('userId'), 10) : 0
+  userId: localRead('userId') ? parseInt(localRead('userId'), 10) : 0,
+  apiTasks: {}
 }

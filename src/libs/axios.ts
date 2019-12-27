@@ -2,7 +2,7 @@ import axios from 'axios'
 import router from '@/router'
 import { Message, Modal } from 'view-design'
 import store from '@/store'
-import { getUserPass } from './util'
+// import { getUserPass } from './util'
 
 const baseToken: string = 'Basic Y29tbWE6Y29tbWE='
 
@@ -15,20 +15,35 @@ class HttpRequest {
     this.queue = {}
   }
 
-  getInsideConfig () {
+  getInsideConfig (options: any) {
     const Authorization: string = store.state && store.state.access_token ? `Bearer ${store.state.access_token}` : baseToken
     const config = {
       baseURL: this.baseUrl,
       headers: {
         Authorization
       },
-      withCredentials: true
+      withCredentials: true,
+      cancelToken: new axios.CancelToken(function executor (fn) { // 设置 cancel token
+        const { apiTasks } = store.state
+        const { url } = options
+        if (url in apiTasks) {
+          fn('请等待请求完成！')
+          // apiTasks[url](`取消了【${url}】`)
+        } else {
+          store.commit('addRequest', {
+            [url]: fn
+          })
+        }
+        // console.log('cancelToken', fn, apiTasks)
+      })
     }
     // console.log('getInsideConfig', config)
     return config
   }
   destroy (url: string): void {
     delete this.queue[url]
+    store.commit('removeRequest', url)
+    // console.log('request completed', apiTasks)
     if (!Object.keys(this.queue).length) {
       // Spin.hide()
     }
@@ -128,7 +143,7 @@ class HttpRequest {
   }
   request (options: any) {
     const instance = axios.create()
-    options = Object.assign(this.getInsideConfig(), options)
+    options = Object.assign(this.getInsideConfig(options), options)
     this.interceptors(instance, options.url)
     return instance(options)
   }

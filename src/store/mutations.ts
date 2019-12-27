@@ -1,6 +1,10 @@
 import { RootStateTypes } from './types'
 import { IRouter } from '@/router'
 
+interface ITask {
+  [url: string]: any
+}
+
 export default {
   // 设置content宽度和高度
   setContentSize (state: RootStateTypes, payload: any) {
@@ -30,5 +34,17 @@ export default {
   },
   onCollapsedChange (state: RootStateTypes) {
     state.isCollapsed = !state.isCollapsed
+  },
+  // 添加api请求
+  addRequest (state: RootStateTypes, task: ITask) {
+    // console.log('set', task)
+    state.apiTasks = {
+      ...state.apiTasks,
+      ...task
+    }
+  },
+  // 删除api请求
+  removeRequest (state: RootStateTypes, url: string) {
+    delete state.apiTasks[url]
   }
 }
